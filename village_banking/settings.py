@@ -14,6 +14,7 @@ from pathlib import Path
 import os
 from corsheaders.defaults import default_headers
 import dj_database_url
+from datetime import timedelta
 import cloudinary
 import cloudinary_storage
 from dotenv import load_dotenv
@@ -46,7 +47,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-    "user_account.apps.UserAccountsConfig"
+    "user_accounts.apps.UserAccountsConfig",
     "corsheaders",
     'rest_framework_simplejwt.token_blacklist',
     'django_filters',
@@ -66,6 +67,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    'ratelimit.middleware.RatelimitMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
@@ -186,3 +188,12 @@ SIMPLE_JWT = {
 }
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": True,  # 👈 Needed
+    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
+    "TOKEN_BLACKLIST_ENABLED": True,
+}

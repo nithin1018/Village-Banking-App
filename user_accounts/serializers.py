@@ -1,6 +1,7 @@
 from .models import Profile
 from rest_framework import serializers
 from rest_framework.validators import ValidationError
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .validators import validate_password1
 
 class RegisterProfileSerializer(serializers.ModelSerializer):
@@ -45,3 +46,13 @@ class RegisterProfileSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+    
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token
+        token['email'] = user.email
+        token['profile_type'] = user.profile_type
+        token['is_staff'] = user.is_staff
+        token['is_superuser'] = user.is_superuser
+        return token
