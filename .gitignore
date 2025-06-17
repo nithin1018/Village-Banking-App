@@ -1,0 +1,105 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Django stuff:
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+db.sqlite3
+db.sqlite3-journal
+
+# Django secret settings
+.env
+.env.*
+
+# Media and static files (optional - only if generated)
+media/
+staticfiles/
+
+# If you're using Django collectstatic
+/static/
+
+# VSCode settings
+.vscode/
+
+# pip environment
+venv/
+env/
+ENV/
+.venv/
+.idea/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# PyCharm
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pytest
+.pytest_cache/
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+
+# Sphinx documentation
+docs/_build/
+
+# Build artifacts
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Unit test / test logs
+.tox/
+noxfile.py
+.cache/
+pytest.ini
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# dotenv
+*.env
+*.env.*
+
+# Git
+*.orig
