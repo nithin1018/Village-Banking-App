@@ -50,7 +50,7 @@ class RegisterProfileSerializer(serializers.ModelSerializer):
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
-        token = super().get_token
+        token = super().get_token(user)
         token['email'] = user.email
         token['profile_type'] = user.profile_type
         token['is_staff'] = user.is_staff
