@@ -7,3 +7,11 @@ class IsUser(BasePermission):
             request.user.is_authenticated and
             getattr(request.user,'profile_type',None) == 'user'
         )
+    
+class IsAdmin(BasePermission):
+    def has_permission(self, request, view):
+        return (
+            request.user.is_authenticated and 
+            getattr(request.user,'profile_type',None) in ['admin','staff']
+        )
+    

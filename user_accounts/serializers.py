@@ -112,3 +112,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ['first_name','last_name','age','phonenumber','profile_pic','account']
+
+class AdminDashboardSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        exclude = ['password']
