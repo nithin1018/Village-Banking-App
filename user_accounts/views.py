@@ -3,10 +3,12 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView,RetrieveAPIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import RegisterProfileSerializer,CustomTokenObtainPairSerializer,ChangePasswordSerializer,ForgetPasswordSerializer
+from .serializers import RegisterProfileSerializer,CustomTokenObtainPairSerializer,ChangePasswordSerializer,ForgetPasswordSerializer,UserProfileSerializer
+from .models import Profile
+from .permission import IsUser
 # Create your views here.
 class RegisterProfileView(CreateAPIView):
     serializer_class = RegisterProfileSerializer
@@ -41,3 +43,9 @@ class ForgotPasswordView(APIView):
             serializer.save()
             return Response({'message':'Changed the Password'},status=status.HTTP_200_OK)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
+class UserProfileView(RetrieveAPIView):
+    permission_classes = [IsUser, IsAuthenticated]
+    serializer_class = UserProfileSerializer
+    def get_object(self):
+        return self.request.user

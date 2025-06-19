@@ -1,4 +1,4 @@
-from .models import Profile
+from .models import Profile,Account
 from rest_framework import serializers
 from rest_framework.validators import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -101,3 +101,14 @@ class ForgetPasswordSerializer(serializers.Serializer):
         user.set_password(new_password)
         user.save()
         return user
+
+class AccountModelSerilizer(serializers.ModelSerializer):
+    class Meta:
+        model = Account
+        fields = '__all__'
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    account = AccountModelSerilizer(read_only=True)
+    class Meta:
+        model = Profile
+        fields = ['first_name','last_name','age','phonenumber','profile_pic','account']
