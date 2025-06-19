@@ -36,15 +36,21 @@ class Profile(AbstractUser):
     ]
     first_name = models.CharField(max_length=100,blank=False,null=False,validators=[validate_name])
     last_name = models.CharField(max_length=100,blank=False,null=False,validators=[validate_name])
-    age = models.IntegerField(blank=True,null=True,validators=[validate_age])
+    age = models.IntegerField(blank=False,null=False,validators=[validate_age])
     email = models.EmailField(unique=True, blank=False,null=False)
     phonenumber = PhoneNumberField(unique=True,region='IN')
     profile_type = models.CharField(max_length=10, choices=PROFILE_CHOICES,default='user')
-    account_number = models.CharField(max_length=20,blank=True,null=True)
     employee_id = models.CharField(max_length=20,blank=True,null=True)
-    profile_pic = CloudinaryField('image')
+    profile_pic = CloudinaryField('image',null=True,blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = CustomUserManager()
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name']
+
+class Account(models.Model):
+    user = models.OneToOneField('Profile',on_delete=models.CASCADE,related_name='account')
+    account_number = models.CharField(max_length=20,blank=True,null=True)
+    balance = models.DecimalField(default=0.00,decimal_places=2,max_digits=12)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
