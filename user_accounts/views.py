@@ -18,6 +18,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
 class ProfileLogoutView(APIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = ForgetPasswordSerializer
     def patch(self, request):
         try:
             refresh_token = request.data['refresh']
@@ -29,6 +30,7 @@ class ProfileLogoutView(APIView):
 
 class UpdatePasswordView(APIView):
     permission_classes=[IsAuthenticated]
+    serializer_class = ChangePasswordSerializer
     def patch(self, request):
         serilaizer = ChangePasswordSerializer(data=request.data,context={'request':request})
         if serilaizer.is_valid():
@@ -37,6 +39,7 @@ class UpdatePasswordView(APIView):
         return Response(serilaizer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 class ForgotPasswordView(APIView):
+    serializer_class = ForgetPasswordSerializer
     def post(self, request):
         serializer = ForgetPasswordSerializer(data=request.data)
         if serializer.is_valid():

@@ -2,7 +2,7 @@ from .models import Profile,Account
 from rest_framework import serializers
 from rest_framework.validators import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from phonenumber_field.modelfields import PhoneNumberField
+from phonenumber_field.serializerfields import PhoneNumberField
 from .validators import validate_password1
 
 class RegisterProfileSerializer(serializers.ModelSerializer):
@@ -63,7 +63,7 @@ class ChangePasswordSerializer(serializers.Serializer):
         user = self.context['request'].user
         if not user.check_password(attrs['old_password']):
             raise ValidationError({'old_password':'Old password is incorrect'})
-        if attrs['password1'] == attrs['new_password']:
+        if attrs['old_password'] == attrs['new_password']:
             raise ValidationError("Old password and new password cannot be same")
         if attrs['new_password'] != attrs['confirm_new_password']:
             raise ValidationError("Password doesnot match")
@@ -83,12 +83,12 @@ class ForgetPasswordSerializer(serializers.Serializer):
     confirm_new_password = serializers.CharField(write_only=True)
     def validate(self, attrs):
         email = attrs.get('email')
-        phonenumber = attrs.get('phonenumber')
-        if not Profile.objects.filter(phonenumber=phonenumber).exists():
-            raise ValidationError("phonenumber does not exists in the database")
+        ph = attrs.get('phonenumber')
         if not Profile.objects.filter(email=email).exists():
             raise ValidationError("Email does not exists in the database")
-        if not Profile.objects.filter(email=email , phonenumber=phonenumber).exists():
+        if not Profile.objects.filter(phonenumber=str(ph)).exists():
+            raise ValidationError("phonenumber does not exist in the database")
+        if not Profile.objects.filter(email=email , phonenumber=ph).exists():
             raise ValidationError("Email and the password does not match to the same user")
         if attrs['new_password'] != attrs['confirm_new_password']:
            raise ValidationError("Password doesnot match")
