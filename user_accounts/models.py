@@ -50,7 +50,7 @@ class Profile(AbstractUser):
 
 class Account(models.Model):
     user = models.OneToOneField('Profile',on_delete=models.CASCADE,related_name='account')
-    account_number = models.CharField(max_length=20,blank=True,null=True)
+    account_number = models.CharField(max_length=20,blank=True,null=True,unique=True)
     balance = models.DecimalField(default=0.00,decimal_places=2,max_digits=12)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
