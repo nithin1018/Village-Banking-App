@@ -54,3 +54,22 @@ class Account(models.Model):
     balance = models.DecimalField(default=0.00,decimal_places=2,max_digits=12)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+class Transaction(models.Model):
+    TRANSACTION_TYPE = [
+        ('withdraw','Withdraw'),
+        ('deposit','Deposit'),
+        ('transfer','Transfer'),
+    ]
+    STATUS_CHOICE = [
+        ('success','Success'),
+        ('failed','Failed'),
+        ('pending','Pending'),
+    ]
+    transaction_type = models.CharField(max_length=12,choices=TRANSACTION_TYPE)
+    sender = models.ForeignKey('Account',on_delete=models.SET_NULL,null=True,related_name='senter_transaction')
+    reciever = models.ForeignKey('Account',on_delete=models.SET_NULL,null=True,related_name='reciever_transaction')
+    amount = models.DecimalField(decimal_places=2,max_digits=12,blank=False,null=False)
+    status = models.CharField(max_length=12,choices=STATUS_CHOICE,default='pending')
+    description = models.TextField(max_length=100,blank=True,null=True)
+    timestamp = models.DateTimeField(auto_now_add=True)

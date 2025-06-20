@@ -58,6 +58,7 @@ class AdminDashboardView(APIView):
     permission_classes = [IsAdmin, IsAuthenticated]
     def get(self, request):
         current_user_data = AdminDashboardSerializer(request.user).data
+        no_of_user = Profile.objects.get(profile_type='users').count()
         all_users = UserProfileSerializer(Profile.objects.get(profile_type='user')).data
         return Response(
             {'current_user':current_user_data,
