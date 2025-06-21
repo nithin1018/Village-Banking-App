@@ -104,16 +104,36 @@ class ForgetPasswordSerializer(serializers.Serializer):
         user.save()
         return user
 
-class AccountModelSerilizer(serializers.ModelSerializer):
-    class Meta:
-        model = Account
-        fields = '__all__'
+
+class TransactionModelSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = Transaction
+            fields = ['transaction_type','sender','receiver','amount','status','description','timestamp']
+
+class AccountModelSerializer(serializers.ModelSerializer):
+        sender = TransactionModelSerializer(source='sender_transaction',many=True, read_only=True)
+        receiver = TransactionModelSerializer(source='receiver_transaction',many=True, read_only=True)
+        class Meta:
+            model = Account
+            fields = ['account_number','balance','created_at','sender','receiver']
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    account = AccountModelSerilizer(read_only=True)
+    account = AccountModelSerializer(read_only=True)
     class Meta:
         model = Profile
         fields = ['first_name','last_name','age','phonenumber','profile_pic','account']
+
+
+class UserProfileDetailedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ['first_name','last_name','age','phonenumber','profile_pic','account']
+
+class AccountDetailedModelSerializer(serializers.ModelSerializer):
+    user = UserProfileDetailedSerializer(read_only=True)
+    class Meta:
+        model = Account
+        fields = ['account_number','balance','created_at','user']
 
 class AdminDashboardSerializer(serializers.ModelSerializer):
     class Meta:

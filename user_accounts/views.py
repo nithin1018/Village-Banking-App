@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.generics import CreateAPIView,RetrieveAPIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import RegisterProfileSerializer,CustomTokenObtainPairSerializer,ChangePasswordSerializer,ForgetPasswordSerializer,UserProfileSerializer,AdminDashboardSerializer,TransactionInputSerializer,TransactionOutputSerializer
+from .serializers import RegisterProfileSerializer,CustomTokenObtainPairSerializer,ChangePasswordSerializer,ForgetPasswordSerializer,UserProfileSerializer,AdminDashboardSerializer,TransactionInputSerializer,TransactionOutputSerializer,TransactionModelSerializer,AccountDetailedModelSerializer
 from .models import Profile,Account
 from .permission import IsUser,IsAdmin
 from .services import handle_transaction
@@ -53,16 +53,13 @@ class UserProfileView(RetrieveAPIView):
     permission_classes = [IsUser, IsAuthenticated]
     serializer_class = UserProfileSerializer
     def get_object(self):
-        user = self.request.user
-        user_account = user.account
-        sent_transaction = user_account.sender_transaction.all()
-        received_transaction = user_account.receiver_transaction.all()
-        return Response({
-            'user':user,
-            'user_account':user_account,
-            'sent_transaction':sent_transaction,
-            'received_transaction':received_transaction,
-        })
+        return self.request.user
+    
+class AccountProfileDetailedView(RetrieveAPIView):
+    permission_classes = [IsUser, IsAuthenticated]
+    serializer_class = AccountDetailedModelSerializer
+    queryset = Account.objects.all()
+
     
 class AdminDashboardView(APIView):
     serializer_class = AdminDashboardSerializer
