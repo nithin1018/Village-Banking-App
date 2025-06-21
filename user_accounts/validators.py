@@ -16,3 +16,7 @@ def validate_age(value):
 def validate_name(value):
     if not re.search(r"^[A-Za-z ]+$",value):
         raise ValidationError('Name cannot contain any special characters')
+    
+def validate_amount(value):
+    if value < 0:
+        raise ValidationError({"value":"Amount must be greater than zero"})

@@ -54,7 +54,8 @@ class Account(models.Model):
     balance = models.DecimalField(default=0.00,decimal_places=2,max_digits=12)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
+    def __str__(self):
+        return f"{self.account_number} -- {self.user.email}" 
 class Transaction(models.Model):
     TRANSACTION_TYPE = [
         ('withdraw','Withdraw'),
@@ -67,8 +68,8 @@ class Transaction(models.Model):
         ('pending','Pending'),
     ]
     transaction_type = models.CharField(max_length=12,choices=TRANSACTION_TYPE)
-    sender = models.ForeignKey('Account',on_delete=models.SET_NULL,null=True,related_name='senter_transaction')
-    reciever = models.ForeignKey('Account',on_delete=models.SET_NULL,null=True,related_name='reciever_transaction')
+    sender = models.ForeignKey('Account',on_delete=models.SET_NULL,null=True,related_name='sender_transaction')
+    receiver = models.ForeignKey('Account',on_delete=models.SET_NULL,null=True,related_name='receiver_transaction')
     amount = models.DecimalField(decimal_places=2,max_digits=12,blank=False,null=False)
     status = models.CharField(max_length=12,choices=STATUS_CHOICE,default='pending')
     description = models.TextField(max_length=100,blank=True,null=True)

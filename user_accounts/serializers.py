@@ -1,9 +1,11 @@
-from .models import Profile,Account
-from rest_framework import serializers
+from .models import Profile,Account,Transaction
+from rest_framework import serializers,status
+from rest_framework.exceptions import ErrorDetail
 from rest_framework.validators import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from phonenumber_field.serializerfields import PhoneNumberField
-from .validators import validate_password1
+from rest_framework.response import Response
+from .validators import validate_password1,validate_name,validate_amount
 
 class RegisterProfileSerializer(serializers.ModelSerializer):
     password1 = serializers.CharField(write_only=True, validators=[validate_password1])
@@ -117,3 +119,52 @@ class AdminDashboardSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         exclude = ['password']
+
+class TransactionInputSerializer(serializers.Serializer):
+    first_name = serializers.CharField(required=True,validators=[validate_name])
+    last_name = serializers.CharField(required=True,validators=[validate_name])
+    account_number = serializers.CharField(max_length=6, required=True)
+    transaction_type = serializers.ChoiceField(required=True, choices=Transaction.TRANSACTION_TYPE)
+    amount = serializers.DecimalField(max_digits=12, decimal_places=2, required=True, validators=[validate_amount])
+    description = serializers.CharField(default="")
+    receiver_account_number = serializers.CharField(default="",allow_blank=True)
+
+    def validate(self, attrs):
+        first_name = attrs.get('first_name')
+        last_name = attrs.get('last_name')
+        receiver_account_number = attrs.get('receiver_account_number')
+        transaction_type = attrs.get('transaction_type')
+        request=self.context['request']
+        receiver = None
+        if receiver_account_number:
+            try:
+                receiver = Account.objects.get(account_number=receiver_account_number)
+            except Account.DoesNotExist:
+                raise ValidationError({
+                    "reciever_account_number":ErrorDetail("Reciever Account number doesnt exist.",code="invalid_account_number")
+                })
+        try:
+            user = Profile.objects.get(email=request.user.email)
+            acc = user.account.account_number
+        except Profile.DoesNotExist:
+            return Response({'detail':'profile not found'},status=status.HTTP_400_BAD_REQUEST)
+        except Account.DoesNotExist:
+            return Response({'detail':'account not found'},status=status.HTTP_400_BAD_REQUEST)
+        if  request.user.first_name.lower() != first_name.lower() or request.user.last_name.lower() != last_name.lower():
+            raise ValidationError({
+                "account_number":ErrorDetail("Name of the user and the Account number doesnot match",code="account_number_name_mismatch")
+            })
+        if acc == receiver:
+            raise ValidationError({
+               "reciever_account_number":ErrorDetail("You cant self transfer",code="transfer mismatch")
+            })
+        if transaction_type == 'transfer' and not receiver_account_number:
+            raise ValidationError({
+                "reciever_account_number":ErrorDetail("Reciever account type when the transaction type is transfer",code='invalid_reciever_account')
+            })
+        return attrs
+
+class TransactionOutputSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Transaction
+        fields = ['status','timestamp']
