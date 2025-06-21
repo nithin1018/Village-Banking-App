@@ -120,6 +120,25 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = ['first_name','last_name','age','phonenumber','profile_pic','account']
 
+#used for getting the full details of a particular user that is profile,account and the transaction for the view UserProfileView
+class UserProfileSerializerForAdmin(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ['first_name','last_name','age','phonenumber','profile_pic']
+class AccountModelSerializerForAdmin(serializers.ModelSerializer):
+        user = UserProfileSerializerForAdmin(read_only=True)
+        class Meta:
+            model = Account
+            fields = ['user','account_number','balance','created_at']
+class TransactionModelSerializerForAdmin(serializers.ModelSerializer):
+        sender = AccountModelSerializerForAdmin(read_only=True)
+        receiver = AccountModelSerializerForAdmin(read_only=True)
+        class Meta:
+            model = Transaction
+            fields = ['transaction_type','sender','receiver','amount','status','description','timestamp']
+
+
+
 #for getting the profile account and the profile for getting the details user by user in the AccountProfileDetailedView
 class UserProfileDetailedSerializer(serializers.ModelSerializer):
     class Meta:
@@ -136,6 +155,18 @@ class AdminDashboardSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         exclude = ['password']
+
+#for getting the user's list for admin
+class UserForAdminSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ['first_name','email']
+
+#for getting thee transaction list for admin
+class TransactionListForAdminSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Transaction
+        fields = ['amount','transaction_type','sender','receiver']
 
 #for the transaction view for accpeting the details for the transaction and also the ouput as timestamp and the status of the payment
 class TransactionInputSerializer(serializers.Serializer):
@@ -176,3 +207,4 @@ class TransactionOutputSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
         fields = ['status','timestamp']
+

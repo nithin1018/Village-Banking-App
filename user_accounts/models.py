@@ -47,6 +47,8 @@ class Profile(AbstractUser):
     objects = CustomUserManager()
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name']
+    def __str__(self):
+        return f"{self.id} - {self.email}"
 
 class Account(models.Model):
     user = models.OneToOneField('Profile',on_delete=models.CASCADE,related_name='account')
@@ -56,6 +58,7 @@ class Account(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     def __str__(self):
         return f"{self.account_number} -- {self.user.email}" 
+
 class Transaction(models.Model):
     TRANSACTION_TYPE = [
         ('withdraw','Withdraw'),

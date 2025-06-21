@@ -3,14 +3,14 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-from rest_framework.generics import CreateAPIView,RetrieveAPIView
+from rest_framework.generics import CreateAPIView,RetrieveAPIView,ListAPIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import RegisterProfileSerializer,CustomTokenObtainPairSerializer,ChangePasswordSerializer,ForgetPasswordSerializer,UserProfileSerializer,AdminDashboardSerializer,TransactionInputSerializer,TransactionOutputSerializer,TransactionModelSerializer,AccountDetailedModelSerializer
-from .models import Profile,Account
+from .models import Profile,Account,Transaction
 from .permission import IsUser,IsAdmin
 from .services import handle_transaction
 from .utils import get_account_balance
+from .serializers import RegisterProfileSerializer,CustomTokenObtainPairSerializer,ChangePasswordSerializer,ForgetPasswordSerializer,UserProfileSerializer,AdminDashboardSerializer,TransactionInputSerializer,TransactionOutputSerializer,TransactionModelSerializer,AccountDetailedModelSerializer,UserForAdminSerializer,TransactionListForAdminSerializer,TransactionModelSerializerForAdmin
 # Create your views here.
 #For registering any type of users
 class RegisterProfileView(CreateAPIView):
@@ -83,6 +83,30 @@ class AdminDashboardView(APIView):
             },
             status=status.HTTP_200_OK
         )
+    
+#for getting the list of user for admin
+class AdminDashboardUserView(ListAPIView):
+    permission_classes = [IsAdmin, IsAuthenticated]
+    serializer_class = UserForAdminSerializer
+    queryset = Profile.objects.filter(profile_type='user')
+
+#for getting the detailed view of the user for admin
+class AdminDashboardUserDetailedView(RetrieveAPIView):
+    permission_classes = [IsAdmin, IsAuthenticated]
+    serializer_class = UserProfileSerializer
+    queryset = Profile.objects.filter(profile_type='user')
+
+#for getting the list of transaction for admin
+class AdminDashboardTransactionView(ListAPIView):
+    permission_classes = [IsAdmin, IsAuthenticated]
+    serializer_class = TransactionListForAdminSerializer
+    queryset = Transaction.objects.all()
+
+#for getting the detailed view of the transaction for admin
+class AdminDashboardTransactionDetailedView(RetrieveAPIView):
+    permission_classes = [IsAdmin, IsAuthenticated]
+    serializer_class = TransactionModelSerializerForAdmin
+    queryset = Transaction.objects.all()
 
 #Full Transaction logic of withdraw, transfer and deposit the amount to the account 
 class TransactionView(APIView):
