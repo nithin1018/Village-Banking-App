@@ -1,6 +1,8 @@
 from rest_framework.response import Response
 from .models import Transaction,Account
 from django.db import transaction as db_transaction
+
+#full transaction logic of the withdraw,deposit and transfer of the amount
 def handle_transaction(*,user_account, receiver_account, tran_type, amt, desc=""):
     with db_transaction.atomic():
             txn = Transaction(

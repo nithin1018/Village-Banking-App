@@ -7,23 +7,21 @@ from phonenumber_field.serializerfields import PhoneNumberField
 from rest_framework.response import Response
 from .validators import validate_password1,validate_name,validate_amount
 
+#For creating a user registration form
 class RegisterProfileSerializer(serializers.ModelSerializer):
     password1 = serializers.CharField(write_only=True, validators=[validate_password1])
     password2 = serializers.CharField(write_only=True)
     class Meta:
         model = Profile
         fields = ['first_name','last_name','age','email','phonenumber','password1','password2','profile_type','employee_id','profile_pic']
-
     def validate_email(self, value):
         if Profile.objects.filter(email=value).exists():
             raise ValidationError("Email already exists")
         return value
-    
     def validate_phonenumber(self, value):
         if Profile.objects.filter(phonenumber=value).exists():
             raise ValidationError('PhoneNumber already exists!!!')
         return value
-    
     def validate(self, attrs):
         profile_type = attrs.get('profile_type')
         employee_id = attrs.get('employee_id')
@@ -32,7 +30,6 @@ class RegisterProfileSerializer(serializers.ModelSerializer):
         if profile_type in ['admin', 'staff'] and not employee_id:
             raise ValidationError("Employee id is required")
         return attrs
-    
     def create(self, validated_data):
         password = validated_data.pop('password1')
         validated_data.pop('password2')
@@ -47,6 +44,7 @@ class RegisterProfileSerializer(serializers.ModelSerializer):
         user.save()
         return user
     
+#for the custom logic of the value of the token 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
@@ -57,6 +55,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['is_superuser'] = user.is_superuser
         return token
     
+#serializer for changing the password
 class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(write_only=True)
     new_password = serializers.CharField(write_only=True, validators=[validate_password1])
@@ -70,7 +69,6 @@ class ChangePasswordSerializer(serializers.Serializer):
         if attrs['new_password'] != attrs['confirm_new_password']:
             raise ValidationError("Password doesnot match")
         return attrs
-            
     def save(self, **kwargs):
         user = self.context['request'].user
         new_password = self.validated_data['new_password']
@@ -78,6 +76,7 @@ class ChangePasswordSerializer(serializers.Serializer):
         user.save()
         return user
     
+#serializer for the forgot password    
 class ForgetPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField()
     phonenumber = PhoneNumberField(region='IN')
@@ -104,54 +103,48 @@ class ForgetPasswordSerializer(serializers.Serializer):
         user.save()
         return user
 
-
+#used for getting the full details of a particular user that is profile,account and the transaction for the view UserProfileView
 class TransactionModelSerializer(serializers.ModelSerializer):
         class Meta:
             model = Transaction
             fields = ['transaction_type','sender','receiver','amount','status','description','timestamp']
-
 class AccountModelSerializer(serializers.ModelSerializer):
         sender = TransactionModelSerializer(source='sender_transaction',many=True, read_only=True)
         receiver = TransactionModelSerializer(source='receiver_transaction',many=True, read_only=True)
         class Meta:
             model = Account
             fields = ['account_number','balance','created_at','sender','receiver']
-
 class UserProfileSerializer(serializers.ModelSerializer):
     account = AccountModelSerializer(read_only=True)
     class Meta:
         model = Profile
         fields = ['first_name','last_name','age','phonenumber','profile_pic','account']
 
-
+#for getting the profile account and the profile for getting the details user by user in the AccountProfileDetailedView
 class UserProfileDetailedSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ['first_name','last_name','age','phonenumber','profile_pic','account']
-
 class AccountDetailedModelSerializer(serializers.ModelSerializer):
     user = UserProfileDetailedSerializer(read_only=True)
     class Meta:
         model = Account
         fields = ['account_number','balance','created_at','user']
 
+#For the AdminDashboard
 class AdminDashboardSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         exclude = ['password']
 
+#for the transaction view for accpeting the details for the transaction and also the ouput as timestamp and the status of the payment
 class TransactionInputSerializer(serializers.Serializer):
-    first_name = serializers.CharField(required=True,validators=[validate_name])
-    last_name = serializers.CharField(required=True,validators=[validate_name])
     account_number = serializers.CharField(max_length=6, required=True)
     transaction_type = serializers.ChoiceField(required=True, choices=Transaction.TRANSACTION_TYPE)
     amount = serializers.DecimalField(max_digits=12, decimal_places=2, required=True, validators=[validate_amount])
     description = serializers.CharField(default="")
     receiver_account_number = serializers.CharField(default="",allow_blank=True)
-
     def validate(self, attrs):
-        first_name = attrs.get('first_name')
-        last_name = attrs.get('last_name')
         receiver_account_number = attrs.get('receiver_account_number')
         transaction_type = attrs.get('transaction_type')
         request=self.context['request']
@@ -170,10 +163,6 @@ class TransactionInputSerializer(serializers.Serializer):
             return Response({'detail':'profile not found'},status=status.HTTP_400_BAD_REQUEST)
         except Account.DoesNotExist:
             return Response({'detail':'account not found'},status=status.HTTP_400_BAD_REQUEST)
-        if  request.user.first_name.lower() != first_name.lower() or request.user.last_name.lower() != last_name.lower():
-            raise ValidationError({
-                "account_number":ErrorDetail("Name of the user and the Account number doesnot match",code="account_number_name_mismatch")
-            })
         if acc == receiver:
             raise ValidationError({
                "reciever_account_number":ErrorDetail("You cant self transfer",code="transfer mismatch")
@@ -183,7 +172,6 @@ class TransactionInputSerializer(serializers.Serializer):
                 "reciever_account_number":ErrorDetail("Reciever account type when the transaction type is transfer",code='invalid_reciever_account')
             })
         return attrs
-
 class TransactionOutputSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction

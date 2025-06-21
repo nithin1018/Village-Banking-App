@@ -12,12 +12,15 @@ from .permission import IsUser,IsAdmin
 from .services import handle_transaction
 from .utils import get_account_balance
 # Create your views here.
+#For registering any type of users
 class RegisterProfileView(CreateAPIView):
     serializer_class = RegisterProfileSerializer
 
+#Used for obtaining the access token and the refresh toekn
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
+#used to logout any users
 class ProfileLogoutView(APIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ForgetPasswordSerializer
@@ -30,6 +33,7 @@ class ProfileLogoutView(APIView):
         except Exception as e:
             return Response({'error':'Invalid refresh token'},status=status.HTTP_400_BAD_REQUEST)
 
+#used to update the password of the logined user
 class UpdatePasswordView(APIView):
     permission_classes=[IsAuthenticated]
     serializer_class = ChangePasswordSerializer
@@ -40,6 +44,7 @@ class UpdatePasswordView(APIView):
             return Response({'message':'Password Updated Successully'},status=status.HTTP_200_OK)
         return Response(serilaizer.errors,status=status.HTTP_400_BAD_REQUEST)
 
+#used to change the password is password is forgotten can be used when not logged in 
 class ForgotPasswordView(APIView):
     serializer_class = ForgetPasswordSerializer
     def post(self, request):
@@ -48,19 +53,21 @@ class ForgotPasswordView(APIView):
             serializer.save()
             return Response({'message':'Changed the Password'},status=status.HTTP_200_OK)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-
+    
+#full details of the user profile,transaction,account
 class UserProfileView(RetrieveAPIView):
     permission_classes = [IsUser, IsAuthenticated]
     serializer_class = UserProfileSerializer
     def get_object(self):
         return self.request.user
     
+#Detailed view of an account using the id will get the profile and account
 class AccountProfileDetailedView(RetrieveAPIView):
     permission_classes = [IsUser, IsAuthenticated]
     serializer_class = AccountDetailedModelSerializer
     queryset = Account.objects.all()
 
-    
+#Detailed view of the admin will get the total users,balance and the admin details
 class AdminDashboardView(APIView):
     serializer_class = AdminDashboardSerializer
     permission_classes = [IsAdmin, IsAuthenticated]
@@ -76,6 +83,8 @@ class AdminDashboardView(APIView):
             },
             status=status.HTTP_200_OK
         )
+
+#Full Transaction logic of withdraw, transfer and deposit the amount to the account 
 class TransactionView(APIView):
     permission_classes = [IsUser]
     serializer_class = TransactionInputSerializer
