@@ -10,7 +10,10 @@ from .models import Profile,Account,Transaction
 from .permission import IsUser,IsAdmin
 from .services import handle_transaction
 from .utils import get_account_balance
-from .serializers import RegisterProfileSerializer,CustomTokenObtainPairSerializer,ChangePasswordSerializer,ForgetPasswordSerializer,UserProfileSerializer,AdminDashboardSerializer,TransactionInputSerializer,TransactionOutputSerializer,TransactionModelSerializer,AccountDetailedModelSerializer,UserForAdminSerializer,TransactionListForAdminSerializer,TransactionModelSerializerForAdmin
+from .serializers import RegisterProfileSerializer,CustomTokenObtainPairSerializer,ChangePasswordSerializer,ForgetPasswordSerializer,UserProfileSerializer,AdminDashboardSerializer,TransactionInputSerializer,TransactionOutputSerializer,AccountDetailedModelSerializer,UserForAdminSerializer,TransactionListForAdminSerializer,TransactionModelSerializerForAdmin
+from django_filters.rest_framework import DjangoFilterBackend
+from .filters import TransactionFilter,ProfileFilter
+from rest_framework import filters
 # Create your views here.
 #For registering any type of users
 class RegisterProfileView(CreateAPIView):
@@ -58,6 +61,10 @@ class ForgotPasswordView(APIView):
 class UserProfileView(RetrieveAPIView):
     permission_classes = [IsUser, IsAuthenticated]
     serializer_class = UserProfileSerializer
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_class = TransactionFilter
+    ordering_fields = ['id','timestamp']
+    ordering = ['id']
     def get_object(self):
         return self.request.user
     
@@ -89,18 +96,30 @@ class AdminDashboardUserView(ListAPIView):
     permission_classes = [IsAdmin, IsAuthenticated]
     serializer_class = UserForAdminSerializer
     queryset = Profile.objects.filter(profile_type='user')
+    filter_backends = [DjangoFilterBackend,filters.OrderingFilter]
+    filterset_class = ProfileFilter
+    ordering_fields = ['first_name','age','created_at']
+    ordering = ['created_at']
 
 #for getting the detailed view of the user for admin
 class AdminDashboardUserDetailedView(RetrieveAPIView):
     permission_classes = [IsAdmin, IsAuthenticated]
     serializer_class = UserProfileSerializer
     queryset = Profile.objects.filter(profile_type='user')
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = TransactionFilter
+    ordering_fields = ['id','timestamp']
+    ordering = ['id']
 
 #for getting the list of transaction for admin
 class AdminDashboardTransactionView(ListAPIView):
     permission_classes = [IsAdmin, IsAuthenticated]
     serializer_class = TransactionListForAdminSerializer
     queryset = Transaction.objects.all()
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_class = TransactionFilter
+    ordering_fields = ['id','timestamp']
+    ordering = ['id']
 
 #for getting the detailed view of the transaction for admin
 class AdminDashboardTransactionDetailedView(RetrieveAPIView):

@@ -160,20 +160,20 @@ class AdminDashboardSerializer(serializers.ModelSerializer):
 class UserForAdminSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ['first_name','email']
+        fields = ['first_name','last_name','email','phonenumber']
 
 #for getting thee transaction list for admin
 class TransactionListForAdminSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
-        fields = ['amount','transaction_type','sender','receiver']
+        fields = ['amount','transaction_type','sender','receiver','status']
 
 #for the transaction view for accpeting the details for the transaction and also the ouput as timestamp and the status of the payment
 class TransactionInputSerializer(serializers.Serializer):
     account_number = serializers.CharField(max_length=6, required=True)
     transaction_type = serializers.ChoiceField(required=True, choices=Transaction.TRANSACTION_TYPE)
     amount = serializers.DecimalField(max_digits=12, decimal_places=2, required=True, validators=[validate_amount])
-    description = serializers.CharField(default="")
+    description = serializers.CharField(default="",allow_blank=True)
     receiver_account_number = serializers.CharField(default="",allow_blank=True)
     def validate(self, attrs):
         receiver_account_number = attrs.get('receiver_account_number')
