@@ -44,6 +44,8 @@ class Profile(AbstractUser):
     profile_pic = CloudinaryField('image',null=True,blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    otp = models.CharField(max_length=128, blank=True, null=True)
+    otp_created_time = models.DateTimeField(blank=True, null=True)
     objects = CustomUserManager()
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name']

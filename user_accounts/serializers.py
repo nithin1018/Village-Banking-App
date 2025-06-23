@@ -5,8 +5,10 @@ from rest_framework.validators import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from phonenumber_field.serializerfields import PhoneNumberField
 from rest_framework.response import Response
+from django.utils import timezone
 from .validators import validate_password1,validate_name,validate_amount
-
+from datetime import timedelta
+from django.contrib.auth.hashers import check_password
 #For creating a user registration form
 class RegisterProfileSerializer(serializers.ModelSerializer):
     password1 = serializers.CharField(write_only=True, validators=[validate_password1])
@@ -76,28 +78,55 @@ class ChangePasswordSerializer(serializers.Serializer):
         user.save()
         return user
     
+#class for sending otp to the email
+class SentOtpSerializer(serializers.Serializer):
+    email =  serializers.CharField()
+    def validate(self, attrs):
+        email = attrs['email']
+        try:
+            user = Profile.objects.get(email=email)
+        except Profile.DoesNotExist:
+            raise ValidationError({
+                "User doesn't exist":ErrorDetail("User with thei provided email doesnt exist",code="invalid_email")
+            })
+        attrs['user'] = user
+        return attrs
 #serializer for the forgot password    
 class ForgetPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField()
-    phonenumber = PhoneNumberField(region='IN')
+    otp = serializers.CharField()
     new_password = serializers.CharField(write_only=True, validators=[validate_password1])
     confirm_new_password = serializers.CharField(write_only=True)
     def validate(self, attrs):
         email = attrs.get('email')
-        ph = attrs.get('phonenumber')
-        if not Profile.objects.filter(email=email).exists():
-            raise ValidationError("Email does not exists in the database")
-        if not Profile.objects.filter(phonenumber=str(ph)).exists():
-            raise ValidationError("phonenumber does not exist in the database")
-        if not Profile.objects.filter(email=email , phonenumber=ph).exists():
-            raise ValidationError("Email and the password does not match to the same user")
+        otp = attrs.get('otp')
+        try:
+            user = Profile.objects.get(email=email)
+        except Profile.DoesNotExist:
+            raise ValidationError({
+                "Profile":ErrorDetail("Email doesnt exist in the database",code="Invalid_email")
+            })
+        if not user.otp:
+            raise ValidationError({
+                "otp": ErrorDetail("No OTP was requested or it has expired.", code="no_otp")
+    })
+        if not check_password(otp, user.otp):
+            raise ValidationError({
+                "otp":ErrorDetail("Invalid Otp",code="invalid_otp")
+            })
+        now = timezone.now()
+        expiry_time = user.otp_created_time + timedelta(minutes=1)
+        if now > expiry_time:
+            raise ValidationError({
+            "otp":ErrorDetail("Otp expired please request for another otp",code="otp_expired")
+        })
         if attrs['new_password'] != attrs['confirm_new_password']:
            raise ValidationError("Password doesnot match")
         return attrs
+    
     def save(self, **kwargs):
         email = self.validated_data['email']
-        phonenumber = self.validated_data['phonenumber']
-        user = Profile.objects.get(email=email, phonenumber=phonenumber)
+        user = Profile.objects.get(email=email)
         new_password = self.validated_data.pop('new_password')
         user.set_password(new_password)
         user.save()

@@ -10,10 +10,11 @@ from .models import Profile,Account,Transaction
 from .permission import IsUser,IsAdmin
 from .services import handle_transaction
 from .utils import get_account_balance
-from .serializers import RegisterProfileSerializer,CustomTokenObtainPairSerializer,ChangePasswordSerializer,ForgetPasswordSerializer,UserProfileSerializer,AdminDashboardSerializer,TransactionInputSerializer,TransactionOutputSerializer,AccountDetailedModelSerializer,UserForAdminSerializer,TransactionListForAdminSerializer,TransactionModelSerializerForAdmin
+from .serializers import RegisterProfileSerializer,CustomTokenObtainPairSerializer,ChangePasswordSerializer,ForgetPasswordSerializer,UserProfileSerializer,AdminDashboardSerializer,TransactionInputSerializer,TransactionOutputSerializer,AccountDetailedModelSerializer,UserForAdminSerializer,TransactionListForAdminSerializer,TransactionModelSerializerForAdmin,SentOtpSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import TransactionFilter,ProfileFilter
 from rest_framework import filters
+from .utils import send_otp_email
 # Create your views here.
 #For registering any type of users
 class RegisterProfileView(CreateAPIView):
@@ -47,6 +48,16 @@ class UpdatePasswordView(APIView):
             return Response({'message':'Password Updated Successully'},status=status.HTTP_200_OK)
         return Response(serilaizer.errors,status=status.HTTP_400_BAD_REQUEST)
 
+#used to to get the otp for the user
+class SendOtpView(APIView):
+    def post(self, request):
+        serializer = SentOtpSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.validated_data['user']
+            send_otp_email(user,"Forgot Password")
+            return Response({"message":"Otp sent successfully"},status=status.HTTP_200_OK)
+        return Response({"error":"Otp send failed"},status=status.HTTP_400_BAD_REQUEST)
+
 #used to change the password is password is forgotten can be used when not logged in 
 class ForgotPasswordView(APIView):
     serializer_class = ForgetPasswordSerializer
@@ -56,7 +67,7 @@ class ForgotPasswordView(APIView):
             serializer.save()
             return Response({'message':'Changed the Password'},status=status.HTTP_200_OK)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-    
+
 #full details of the user profile,transaction,account
 class UserProfileView(RetrieveAPIView):
     permission_classes = [IsUser, IsAuthenticated]

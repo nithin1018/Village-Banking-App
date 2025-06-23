@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
-from .views import RegisterProfileView,CustomTokenObtainPairView,ProfileLogoutView,UpdatePasswordView,ForgotPasswordView,UserProfileView,AdminDashboardView,TransactionView,AccountProfileDetailedView,AdminDashboardUserView,AdminDashboardUserDetailedView,AdminDashboardTransactionView,AdminDashboardTransactionDetailedView
+from .views import RegisterProfileView,CustomTokenObtainPairView,ProfileLogoutView,UpdatePasswordView,ForgotPasswordView,UserProfileView,AdminDashboardView,TransactionView,AccountProfileDetailedView,AdminDashboardUserView,AdminDashboardUserDetailedView,AdminDashboardTransactionView,AdminDashboardTransactionDetailedView,SendOtpView
 
 urlpatterns = [
     path("profile/register/", RegisterProfileView.as_view(),name='profile_register'),
@@ -9,6 +9,7 @@ urlpatterns = [
     path('profile/logout/',ProfileLogoutView.as_view(),name='profile_logout'),
     path('profile/change-password/',UpdatePasswordView.as_view(),name='profile_change_password'),
     path('profile/login/forgot-password/',ForgotPasswordView.as_view(),name='profile_login_forgot_password'),
+    path('profile/login/sentotp/',SendOtpView.as_view(),name='profile_login_sentotp'),
     path('profile/',UserProfileView.as_view(),name='profile'),
     path('profile/<int:pk>/',AccountProfileDetailedView.as_view(),name='profile_detailed'),
     path('admin/dashboard/',AdminDashboardView.as_view(),name='admin_dashboard'),

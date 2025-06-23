@@ -18,11 +18,26 @@ from datetime import timedelta
 import cloudinary
 import cloudinary_storage
 from dotenv import load_dotenv
-
+import environ
 load_dotenv()
+
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+#Used for Google email otp send
+env = environ.Env()
+environ.Env.read_env()
+
+EMAIL_BACKEND = env("EMAIL_BACKEND")
+EMAIL_HOST = env("EMAIL_HOST")
+EMAIL_PORT = env.int("EMAIL_PORT")  # Cast to int
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS") 
+EMAIL_HOST_USER = env("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
+
 
 
 # Quick-start development settings - unsuitable for production
