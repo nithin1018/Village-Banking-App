@@ -145,9 +145,15 @@ class AccountModelSerializer(serializers.ModelSerializer):
             fields = ['account_number','balance','created_at','sender','receiver']
 class UserProfileSerializer(serializers.ModelSerializer):
     account = AccountModelSerializer(read_only=True)
+    image_url = serializers.SerializerMethodField()
     class Meta:
         model = Profile
-        fields = ['first_name','last_name','age','phonenumber','profile_pic','account']
+        fields = ['first_name','last_name','age','phonenumber','profile_pic','image_url','account']
+    def get_image_url(self, obj):
+        request = self.context.get('request')
+        if obj.profile_pic:
+            return request.build_absolute_uri(obj.profile_pic.url) if request else obj.profile_pic.url
+        return None
 
 #used for getting the full details of a particular user that is profile,account and the transaction for the view UserProfileView
 class UserProfileSerializerForAdmin(serializers.ModelSerializer):
@@ -189,7 +195,7 @@ class AdminDashboardSerializer(serializers.ModelSerializer):
 class UserForAdminSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ['first_name','last_name','email','phonenumber']
+        fields = ['id','first_name','last_name','email','phonenumber']
 
 #for getting thee transaction list for admin
 class TransactionListForAdminSerializer(serializers.ModelSerializer):
