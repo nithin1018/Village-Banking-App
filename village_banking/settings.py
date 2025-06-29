@@ -186,6 +186,15 @@ REST_FRAMEWORK = {
         'rest_framework.filters.SearchFilter',
         'rest_framework.filters.OrderingFilter',
     ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',  # for unauthenticated users
+        'rest_framework.throttling.UserRateThrottle',  # for authenticated users
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '5/minute',     # adjust as needed
+        'user': '10/minute',    # logged-in users
+        'otp': '1/minute',      # custom class, we'll define this next
+    },
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DATETIME_FORMAT': "%Y-%m-%d %H:%M:%S",
 }

@@ -15,6 +15,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .filters import TransactionFilter,ProfileFilter
 from rest_framework import filters
 from .utils import send_otp_email
+from .throttles import OTPThrottle
+from rest_framework.throttling import UserRateThrottle,AnonRateThrottle
 # Create your views here.
 #For registering any type of users
 class RegisterProfileView(CreateAPIView):
@@ -26,6 +28,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
 #used to logout any users
 class ProfileLogoutView(APIView):
+    throttle_classes = [UserRateThrottle]
     permission_classes = [IsAuthenticated]
     serializer_class = ForgetPasswordSerializer
     def patch(self, request):
@@ -39,6 +42,7 @@ class ProfileLogoutView(APIView):
 
 #used to update the password of the logined user
 class UpdatePasswordView(APIView):
+    throttle_classes = [UserRateThrottle]
     permission_classes=[IsAuthenticated]
     serializer_class = ChangePasswordSerializer
     def patch(self, request):
@@ -50,6 +54,7 @@ class UpdatePasswordView(APIView):
 
 #used to to get the otp for the user
 class SendOtpView(APIView):
+    throttle_classes = [OTPThrottle]
     def post(self, request):
         serializer = SentOtpSerializer(data=request.data)
         if serializer.is_valid():
@@ -60,6 +65,7 @@ class SendOtpView(APIView):
 
 #used to change the password is password is forgotten can be used when not logged in 
 class ForgotPasswordView(APIView):
+    throttle_classes = [AnonRateThrottle]
     serializer_class = ForgetPasswordSerializer
     def post(self, request):
         serializer = ForgetPasswordSerializer(data=request.data)
@@ -70,6 +76,7 @@ class ForgotPasswordView(APIView):
 
 #full details of the user profile,transaction,account
 class UserProfileView(RetrieveAPIView):
+    throttle_classes = [UserRateThrottle]
     permission_classes = [IsUser, IsAuthenticated]
     serializer_class = UserProfileSerializer
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
@@ -81,12 +88,14 @@ class UserProfileView(RetrieveAPIView):
     
 #Detailed view of an account using the id will get the profile and account
 class AccountProfileDetailedView(RetrieveAPIView):
-    permission_classes = [IsUser, IsAuthenticated]
+    throttle_classes = [UserRateThrottle]
+    permission_classes = [IsAuthenticated]
     serializer_class = AccountDetailedModelSerializer
     queryset = Account.objects.all()
 
 #Detailed view of the admin will get the total users,balance and the admin details
 class AdminDashboardView(APIView):
+    throttle_classes = [UserRateThrottle]
     serializer_class = AdminDashboardSerializer
     permission_classes = [IsAdmin, IsAuthenticated]
     def get(self, request):
@@ -104,6 +113,7 @@ class AdminDashboardView(APIView):
     
 #for getting the list of user for admin
 class AdminDashboardUserView(ListAPIView):
+    throttle_classes = [UserRateThrottle]
     permission_classes = [IsAdmin, IsAuthenticated]
     serializer_class = UserForAdminSerializer
     queryset = Profile.objects.filter(profile_type='user')
@@ -114,16 +124,17 @@ class AdminDashboardUserView(ListAPIView):
 
 #for getting the detailed view of the user for admin
 class AdminDashboardUserDetailedView(RetrieveAPIView):
+    throttle_classes = [UserRateThrottle]
     permission_classes = [IsAdmin, IsAuthenticated]
     serializer_class = UserProfileSerializer
     queryset = Profile.objects.filter(profile_type='user')
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = TransactionFilter
+    filter_backends = [filters.OrderingFilter]
     ordering_fields = ['id','timestamp']
     ordering = ['id']
 
 #for getting the list of transaction for admin
 class AdminDashboardTransactionView(ListAPIView):
+    throttle_classes = [UserRateThrottle]
     permission_classes = [IsAdmin, IsAuthenticated]
     serializer_class = TransactionListForAdminSerializer
     queryset = Transaction.objects.all()
@@ -134,6 +145,7 @@ class AdminDashboardTransactionView(ListAPIView):
 
 #for getting the detailed view of the transaction for admin
 class AdminDashboardTransactionDetailedView(RetrieveAPIView):
+    throttle_classes = [UserRateThrottle]
     permission_classes = [IsAdmin, IsAuthenticated]
     serializer_class = TransactionModelSerializerForAdmin
     queryset = Transaction.objects.all()
