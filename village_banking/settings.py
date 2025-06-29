@@ -191,8 +191,8 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.UserRateThrottle',  # for authenticated users
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '5/minute',     # adjust as needed
-        'user': '10/minute',    # logged-in users
+        'anon': '5000/minute',     # adjust as needed
+        'user': '10000/minute',    # logged-in users
         'otp': '1/minute',      # custom class, we'll define this next
     },
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
