@@ -178,8 +178,6 @@ class TransactionModelSerializerForAdmin(serializers.ModelSerializer):
             model = Transaction
             fields = ['transaction_type','sender','receiver','amount','status','description','timestamp']
 
-
-
 #for getting the profile account and the profile for getting the details user by user in the AccountProfileDetailedView
 class UserProfileDetailedSerializer(serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField()
