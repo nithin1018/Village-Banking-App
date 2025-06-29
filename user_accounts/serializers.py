@@ -211,7 +211,7 @@ class UserForAdminSerializer(serializers.ModelSerializer):
 class TransactionListForAdminSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
-        fields = ['id','amount','transaction_type','sender','receiver','status']
+        fields = ['id','amount','transaction_type','sender','receiver','status','timestamp']
 
 #for the transaction view for accpeting the details for the transaction and also the ouput as timestamp and the status of the payment
 class TransactionInputSerializer(serializers.Serializer):
