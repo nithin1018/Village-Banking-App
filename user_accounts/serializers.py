@@ -136,7 +136,7 @@ class ForgetPasswordSerializer(serializers.Serializer):
 class TransactionModelSerializer(serializers.ModelSerializer):
         class Meta:
             model = Transaction
-            fields = ['transaction_type','sender','receiver','amount','status','description','timestamp']
+            fields = ['id','transaction_type','sender','receiver','amount','status','description','timestamp']
 class AccountModelSerializer(serializers.ModelSerializer):
         sender = TransactionModelSerializer(source='sender_transaction',many=True, read_only=True)
         receiver = TransactionModelSerializer(source='receiver_transaction',many=True, read_only=True)
@@ -197,9 +197,15 @@ class AccountDetailedModelSerializer(serializers.ModelSerializer):
 
 #For the AdminDashboard
 class AdminDashboardSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
     class Meta:
         model = Profile
         exclude = ['password']
+    def get_image_url(self, obj):
+        request = self.context.get('request')
+        if obj.profile_pic:
+            return request.build_absolute_uri(obj.profile_pic.url) if request else obj.profile_pic.url
+        return None
 
 #for getting the user's list for admin
 class UserForAdminSerializer(serializers.ModelSerializer):
