@@ -157,9 +157,15 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 #used for getting the full details of a particular user that is profile,account and the transaction for the view UserProfileView
 class UserProfileSerializerForAdmin(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
     class Meta:
         model = Profile
-        fields = ['first_name','last_name','age','phonenumber','profile_pic']
+        fields = ['first_name','last_name','age','phonenumber','profile_pic','image_url']
+    def get_image_url(self, obj):
+        request = self.context.get('request')
+        if obj.profile_pic:
+            return request.build_absolute_uri(obj.profile_pic.url) if request else obj.profile_pic.url
+        return None
 class AccountModelSerializerForAdmin(serializers.ModelSerializer):
         user = UserProfileSerializerForAdmin(read_only=True)
         class Meta:
@@ -176,9 +182,15 @@ class TransactionModelSerializerForAdmin(serializers.ModelSerializer):
 
 #for getting the profile account and the profile for getting the details user by user in the AccountProfileDetailedView
 class UserProfileDetailedSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
     class Meta:
         model = Profile
-        fields = ['first_name','last_name','age','phonenumber','profile_pic','account']
+        fields = ['first_name','last_name','age','phonenumber','profile_pic','image_url','account']
+    def get_image_url(self, obj):
+        request = self.context.get('request')
+        if obj.profile_pic:
+            return request.build_absolute_uri(obj.profile_pic.url) if request else obj.profile_pic.url
+        return None
 class AccountDetailedModelSerializer(serializers.ModelSerializer):
     user = UserProfileDetailedSerializer(read_only=True)
     class Meta:
@@ -201,7 +213,7 @@ class UserForAdminSerializer(serializers.ModelSerializer):
 class TransactionListForAdminSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
-        fields = ['amount','transaction_type','sender','receiver','status']
+        fields = ['id','amount','transaction_type','sender','receiver','status']
 
 #for the transaction view for accpeting the details for the transaction and also the ouput as timestamp and the status of the payment
 class TransactionInputSerializer(serializers.Serializer):
