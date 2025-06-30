@@ -90,9 +90,10 @@ CORS_ALLOWED_ORIGINS = [
     "https://village-bank-htl8jdj04-abjith-b-ks-projects.vercel.app",
     "https://village-bank-app-git-main-abjith-b-ks-projects.vercel.app",
     "https://village-bank-app-abjith-b-ks-projects.vercel.app",
+    "https://village-bank-app.vercel.app",
 ]
 ALLOWED_HOSTS = ['village-banking-app.onrender.com']
-CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_CREDENTIALS = False
 CORS_ALLOW_HEADERS = list(default_headers)
 AUTH_USER_MODEL = 'user_accounts.CustomUser'
 PHONENUMBER_DEFAULT_REGION = 'IN'
