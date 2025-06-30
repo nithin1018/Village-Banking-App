@@ -116,7 +116,7 @@ class AdminDashboardUserView(ListAPIView):
     throttle_classes = [UserRateThrottle]
     permission_classes = [IsAdmin, IsAuthenticated]
     serializer_class = UserForAdminSerializer
-    queryset = Profile.objects.filter(profile_type='user')
+    queryset = Profile.objects.filter(profile_type='user').order_by('created_at')
     filter_backends = [DjangoFilterBackend,filters.OrderingFilter]
     filterset_class = ProfileFilter
     ordering_fields = ['first_name','age','created_at']
@@ -137,7 +137,7 @@ class AdminDashboardTransactionView(ListAPIView):
     throttle_classes = [UserRateThrottle]
     permission_classes = [IsAdmin, IsAuthenticated]
     serializer_class = TransactionListForAdminSerializer
-    queryset = Transaction.objects.all()
+    queryset = Transaction.objects.all().order_by('timestamp')
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_class = TransactionFilter
     ordering_fields = ['id','timestamp']
